@@ -91,7 +91,7 @@ export const OfficialIncomeForm = ({ onCancel }) => {
     // Mandatory Document Validations (Address Proof, Identity Proof, Land Receipt, User Form)
     const requiredDocs = ['addressProof', 'identityProof', 'landReceipt', 'userForm'];
     requiredDocs.forEach((docId) => {
-      if (!formData.uploadedDocs[docId]) {
+      if (!formData.uploadedDocs?.[docId]) {
         errors[docId] = 'Mandatory document upload required (নথি জমা দিয়া বাধ্যতামূলক)';
       }
     });
@@ -125,7 +125,7 @@ export const OfficialIncomeForm = ({ onCancel }) => {
     setShowPhonePeModal(false);
     setIsSubmitting(true);
 
-    const docsArray = Object.keys(formData.uploadedDocs).map((key) => ({
+    const docsArray = Object.keys(formData.uploadedDocs || {}).map((key) => ({
       docId: key,
       ...formData.uploadedDocs[key]
     }));

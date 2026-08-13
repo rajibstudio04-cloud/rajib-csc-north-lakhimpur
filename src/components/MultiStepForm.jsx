@@ -144,10 +144,10 @@ export const MultiStepForm = () => {
 
   const validateStep3 = () => {
     const errors = {};
-    if (selectedService.requiredDocs) {
+    if (selectedService?.requiredDocs) {
       selectedService.requiredDocs.forEach((doc) => {
-        if (doc.required && !formData.uploadedDocs[doc.id]) {
-          errors[doc.id] = `Mandatory document "${doc.name}" must be uploaded`;
+        if (doc?.required && !formData.uploadedDocs?.[doc.id]) {
+          errors[doc.id] = `Mandatory document "${doc?.name || 'Document'}" must be uploaded`;
         }
       });
     }
@@ -559,13 +559,12 @@ export const MultiStepForm = () => {
                 </div>
               </div>
 
-              {/* Uploaded Documents Summary */}
               <div className="border-t pt-3 space-y-1">
-                <span className="font-bold text-slate-700 block">Uploaded Documents ({Object.keys(formData.uploadedDocs).length}):</span>
+                <span className="font-bold text-slate-700 block">Uploaded Documents ({Object.keys(formData.uploadedDocs || {}).length}):</span>
                 <div className="flex flex-wrap gap-2 pt-1">
-                  {Object.keys(formData.uploadedDocs).map((k) => (
+                  {Object.keys(formData.uploadedDocs || {}).map((k) => (
                     <span key={k} className="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2.5 py-1 rounded-lg border border-emerald-300">
-                      ✓ {formData.uploadedDocs[k].name}
+                      ✓ {formData.uploadedDocs[k]?.name || k}
                     </span>
                   ))}
                 </div>

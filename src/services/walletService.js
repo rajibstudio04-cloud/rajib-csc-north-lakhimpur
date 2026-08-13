@@ -197,8 +197,8 @@ export const walletService = {
     const txnRecord = {
       txnId,
       userId,
-      userName: currentUser.name,
-      phone: currentUser.phone,
+      userName: currentUser?.name || 'Lakhimpur Citizen',
+      phone: currentUser?.phone || '',
       type: 'debit',
       amount: requiredAmount,
       balanceAfter: newBalance,
@@ -264,8 +264,8 @@ export const walletService = {
     const txnRecord = {
       txnId,
       userId,
-      userName: currentUser.name,
-      phone: currentUser.phone,
+      userName: currentUser?.name || 'Lakhimpur Citizen',
+      phone: currentUser?.phone || '',
       type: actionType,
       amount: numAmount,
       balanceAfter: newBalance,

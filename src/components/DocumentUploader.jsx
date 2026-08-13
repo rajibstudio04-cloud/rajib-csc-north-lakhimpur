@@ -11,10 +11,33 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
-export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile }) => {
+export const DocumentUploader = ({ 
+  docRequirement, 
+  docId, 
+  label, 
+  required, 
+  onFileChange, 
+  onUploaded, 
+  uploadedFile, 
+  existingDoc 
+}) => {
   const { t } = useApp();
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState('');
+
+  // Resolve values flexibly regardless of caller syntax
+  const effectiveId = docRequirement?.id || docId || 'doc';
+  const effectiveName = docRequirement?.name || label || 'Document';
+  const isRequired = docRequirement?.required ?? required ?? false;
+  const currentFile = uploadedFile || existingDoc || null;
+
+  const handleNotify = (id, fileData) => {
+    if (typeof onFileChange === 'function') {
+      onFileChange(id, fileData);
+    } else if (typeof onUploaded === 'function') {
+      onUploaded(id, fileData);
+    }
+  };
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -46,7 +69,7 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
     // Create object URL / mock base64 for preview
     const reader = new FileReader();
     reader.onload = (event) => {
-      onFileChange(docRequirement.id, {
+      handleNotify(effectiveId, {
         name: file.name,
         type: file.type,
         size: `${(file.size / 1024).toFixed(1)} KB`,
@@ -77,12 +100,12 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
       <div className="flex justify-between items-start mb-2">
         <label className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
           <FileText className="w-4 h-4 text-csc-navy" />
-          <span>{docRequirement.name}</span>
-          {docRequirement.required && (
+          <span>{effectiveName}</span>
+          {isRequired && (
             <span className="text-red-500 font-bold">*</span>
           )}
         </label>
-        {uploadedFile && (
+        {currentFile && (
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Uploaded
@@ -90,7 +113,7 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
         )}
       </div>
 
-      {!uploadedFile ? (
+      {!currentFile ? (
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -104,7 +127,7 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
         >
           <input
             type="file"
-            id={`file-input-${docRequirement.id}`}
+            id={`file-input-${effectiveId}`}
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -123,9 +146,9 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
         /* Preview Card */
         <div className="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3 overflow-hidden">
-            {uploadedFile.type.startsWith('image/') ? (
+            {currentFile.type?.startsWith('image/') ? (
               <img 
-                src={uploadedFile.url} 
+                src={currentFile.url} 
                 alt="Upload preview" 
                 className="w-12 h-12 object-cover rounded-md border border-slate-200 shrink-0" 
               />
@@ -135,15 +158,15 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
               </div>
             )}
             <div className="truncate">
-              <p className="text-xs font-semibold text-slate-800 truncate">{uploadedFile.name}</p>
-              <p className="text-[11px] text-slate-400">{uploadedFile.size}</p>
+              <p className="text-xs font-semibold text-slate-800 truncate">{currentFile.name || 'Document'}</p>
+              <p className="text-[11px] text-slate-400">{currentFile.size || ''}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {uploadedFile.url && (
+            {currentFile.url && (
               <a
-                href={uploadedFile.url}
+                href={currentFile.url}
                 target="_blank"
                 rel="noreferrer"
                 className="p-1.5 text-slate-500 hover:text-csc-navy hover:bg-slate-100 rounded-md transition-colors"
@@ -154,7 +177,7 @@ export const DocumentUploader = ({ docRequirement, onFileChange, uploadedFile })
             )}
             <button
               type="button"
-              onClick={() => onFileChange(docRequirement.id, null)}
+              onClick={() => handleNotify(effectiveId, null)}
               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
               title="Remove File"
             >
