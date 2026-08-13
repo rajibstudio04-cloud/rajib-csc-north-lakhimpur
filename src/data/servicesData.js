@@ -43,8 +43,7 @@ export const SERVICES = [
       { id: 'gaonPradhanCert', name: '6. Gaon Pradhan / Gaonburah Certificate (গাঁও প্ৰধান / গাওঁবুঢ়াৰ প্ৰমাণ পত্ৰ)', required: true },
       { id: 'landReceipt', name: '7. Land Revenue Receipt (ৰাজহ মাচুল আদায়ৰ ৰছিদ)', required: true },
       { id: 'salarySlip', name: '8. Salary Slip (দৰমহাৰ পত্ৰ)', required: false },
-      { id: 'otherDoc', name: '9. Any other document (অন্য নথি)', required: false },
-      { id: 'userForm', name: '10. Upload Scanned Copy of Application Form (ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)', required: true }
+      { id: 'otherDoc', name: '9. Any other document (অন্য নথি)', required: false }
     ],
     fields: [
       { id: 'sourceOfIncome', label: 'Source of Income', type: 'select', options: ['Agriculture / Farming', 'Government Service', 'Private Employment', 'Business / Trade'] },

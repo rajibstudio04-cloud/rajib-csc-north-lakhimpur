@@ -96,8 +96,7 @@ export const OfficialIncomeForm = ({ onCancel }) => {
       'identityProofBack',
       'applicantSignature',
       'gaonPradhanCert',
-      'landReceipt',
-      'userForm'
+      'landReceipt'
     ];
     requiredDocs.forEach((docId) => {
       const legacyId = docId.replace('Front', '').replace('Back', '');
@@ -869,34 +868,6 @@ export const OfficialIncomeForm = ({ onCancel }) => {
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Attachment Row 8: Upload Scanned Copy of Application Form */}
-            <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                <div>
-                  <h4 className="font-extrabold text-slate-900 text-sm">
-                    8. Upload Scanned Copy of the Application Form. <span className="text-red-600">*</span>
-                  </h4>
-                  <span className="font-bold text-slate-800 text-xs">(ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)</span>
-                  <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
-                  </p>
-                </div>
-
-                <div className="shrink-0 w-full sm:w-72">
-                  <DocumentUploader
-                    docId="userForm"
-                    label="Scanned Copy of Form (ইউজাৰ ফৰ্ম)"
-                    required={true}
-                    onUploaded={handleDocumentUploaded}
-                    existingDoc={formData.uploadedDocs['userForm']}
-                  />
-                </div>
-              </div>
-              {validationErrors.userForm && (
-                <p className="text-red-600 font-bold text-[11px]">{validationErrors.userForm}</p>
-              )}
             </div>
 
           </div>
