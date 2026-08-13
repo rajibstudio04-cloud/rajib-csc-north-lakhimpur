@@ -10,9 +10,11 @@ import {
   MessageSquare, 
   AlertCircle, 
   ArrowRight,
-  ShieldCheck,
+  ShieldCheck, 
   Building2,
-  Calendar
+  Calendar,
+  History,
+  Star
 } from 'lucide-react';
 
 export const TrackStatus = () => {
@@ -62,11 +64,114 @@ export const TrackStatus = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in max-w-4xl mx-auto">
-      
-      {/* Search Header Banner */}
-      <div className="bg-csc-navy text-white p-6 sm:p-8 rounded-2xl shadow-xl text-center space-y-4">
-        <h2 className="text-2xl sm:text-3xl font-extrabold">{t('trackTitle')}</h2>
-        <p className="text-xs sm:text-sm text-cyan-200 max-w-xl mx-auto">
+
+      {/* ═══════════════════════════════════════
+          APPLICATION HISTORY SECTION
+      ═══════════════════════════════════════ */}
+      {applications && applications.length > 0 && (
+        <div className="space-y-4">
+          {/* Section Header */}
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+            <History className="w-5 h-5 text-csc-navy" />
+            <h2 className="text-base font-extrabold text-slate-800">
+              Application History ({applications.length})
+            </h2>
+          </div>
+
+          {/* Application Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {applications.map((app) => {
+              const isCompleted = app.status === 'Completed';
+              const isProcessing = app.status === 'Processing';
+              const isVerified = app.status === 'Verified';
+              return (
+                <div
+                  key={app.id}
+                  className={`bg-white rounded-2xl border-2 p-5 shadow-sm space-y-3 transition-all hover:shadow-md ${
+                    isCompleted
+                      ? 'border-emerald-300 bg-emerald-50/30'
+                      : isProcessing
+                      ? 'border-blue-200'
+                      : 'border-slate-200'
+                  }`}
+                >
+                  {/* App Name & Status */}
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        Application Name
+                      </p>
+                      <h3 className="font-extrabold text-sm text-slate-900 leading-tight truncate">
+                        {app.serviceTitle || app.service || 'Service Application'}
+                      </h3>
+                      <p className="text-[11px] font-mono text-slate-500 mt-0.5">
+                        {app.id}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                      isCompleted
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        : isProcessing
+                        ? 'bg-blue-100 text-blue-800 border-blue-300'
+                        : isVerified
+                        ? 'bg-purple-100 text-purple-800 border-purple-300'
+                        : 'bg-amber-100 text-amber-800 border-amber-300'
+                    }`}>
+                      {isCompleted && <CheckCircle2 className="w-3 h-3" />}
+                      {!isCompleted && <Clock className="w-3 h-3" />}
+                      {app.status}
+                    </span>
+                  </div>
+
+                  {/* Submitted Date */}
+                  <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Submitted: {app.submittedAt}</span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        setSearchInput(app.id);
+                        performSearch(app.id);
+                        setTimeout(() => {
+                          document.getElementById('track-search-section')?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition-all cursor-pointer border border-slate-200"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      Track Details
+                    </button>
+
+                    {isCompleted && (
+                      <button
+                        onClick={() => {
+                          alert(`✅ Downloading Certificate\nApplication: ${app.serviceTitle || app.service}\nRef ID: ${app.id}\nApplicant: ${app.applicantName || ''}`);
+                        }}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-2 px-3 rounded-xl transition-all cursor-pointer shadow-md"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════
+          SEARCH / TRACK BY ID SECTION
+      ═══════════════════════════════════════ */}
+      <div id="track-search-section">
+        {/* Search Header Banner */}
+        <div className="bg-csc-navy text-white p-6 sm:p-8 rounded-2xl shadow-xl text-center space-y-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold">{t('trackTitle')}</h2>
+          <p className="text-xs sm:text-sm text-cyan-200 max-w-xl mx-auto">
           {t('trackSubtitle')}
         </p>
 
@@ -104,6 +209,7 @@ export const TrackStatus = () => {
               {app.id} ({app.status})
             </button>
           ))}
+        </div>
         </div>
       </div>
 
