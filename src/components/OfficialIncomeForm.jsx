@@ -206,46 +206,6 @@ export const OfficialIncomeForm = ({ onCancel }) => {
           <p className="text-red-600 font-bold">(* Marked Fields are mandatory)</p>
           <p className="text-red-600 font-bold">(* চিহ্নিত তথ্যবোৰ বাধ্যতামূলক)</p>
         </div>
-
-        {/* Certificate Language Choice & PFC/CSC/USER ID Bar */}
-        <div className="pt-4 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
-          
-          {/* Language Radio Group */}
-          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-            <span className="font-extrabold text-slate-800">
-              Language of the Certificate <br />
-              <span className="text-red-600">( প্ৰমাণ পত্ৰৰ ভাষা )*</span>
-            </span>
-
-            <div className="flex items-center gap-3 bg-white p-2 rounded-xl border border-slate-300">
-              {['English', 'Assamese', 'Bengali', 'Bodo'].map((langOpt) => (
-                <label key={langOpt} className="inline-flex items-center gap-1.5 font-bold text-slate-800 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="certLanguage"
-                    value={langOpt}
-                    checked={formData.certLanguage === langOpt}
-                    onChange={(e) => handleInputChange('certLanguage', e.target.value)}
-                    className="accent-csc-navy cursor-pointer"
-                  />
-                  <span>{langOpt}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Preset PFC/CSC/USER ID Box */}
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-800">PFC/CSC/USER ID :</span>
-            <input
-              type="text"
-              readOnly
-              value={formData.userCscId}
-              className="bg-slate-200 text-slate-900 font-mono font-bold px-3 py-1.5 rounded-lg border border-slate-400 text-xs text-center shadow-inner"
-            />
-          </div>
-
-        </div>
       </div>
 
       <form onSubmit={handleInitiateSubmit} className="p-4 sm:p-6 space-y-6">
