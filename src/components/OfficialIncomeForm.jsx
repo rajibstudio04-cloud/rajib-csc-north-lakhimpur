@@ -4,9 +4,10 @@ import { DocumentUploader } from './DocumentUploader';
 import { PhoneOtpModal } from './PhoneOtpModal';
 import { PhonePePaymentModal } from './PhonePePaymentModal';
 import { SubmissionSuccessModal } from './SubmissionSuccessModal';
+import { CombinedA4Modal } from './CombinedA4Modal';
 import { webhookService } from '../services/webhookService';
 import { whatsappApiService } from '../services/whatsappApiService';
-import { ShieldCheck, CheckCircle, ArrowLeft, Upload, FileText } from 'lucide-react';
+import { ShieldCheck, CheckCircle, ArrowLeft, Upload, FileText, Eye } from 'lucide-react';
 
 export const OfficialIncomeForm = ({ onCancel }) => {
   const { lang, t, selectedService, setSelectedService, addApplication, currentUser, loginUser } = useApp();
@@ -19,6 +20,20 @@ export const OfficialIncomeForm = ({ onCancel }) => {
   const [showPhonePeModal, setShowPhonePeModal] = useState(false);
   const [submittedApp, setSubmittedApp] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Combined A4 View Modal state
+  const [combinedViewModal, setCombinedViewModal] = useState({
+    isOpen: false,
+    title: '',
+    frontDoc: null,
+    backDoc: null
+  });
+  const openCombinedView = (title, frontDoc, backDoc) => {
+    setCombinedViewModal({ isOpen: true, title, frontDoc, backDoc });
+  };
+  const closeCombinedView = () => {
+    setCombinedViewModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   // e-District Form Data State matching exact screenshot fields
   const [formData, setFormData] = useState({
@@ -687,6 +702,25 @@ export const OfficialIncomeForm = ({ onCancel }) => {
                   )}
                 </div>
               </div>
+
+              {/* View Combined A4 Button — Address Proof */}
+              {(formData.uploadedDocs['addressProofFront'] || formData.uploadedDocs['addressProof']) &&
+               formData.uploadedDocs['addressProofBack'] && (
+                <div className="pt-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => openCombinedView(
+                      'Address Proof (ঠিকনাৰ প্ৰমান পত্ৰ)',
+                      formData.uploadedDocs['addressProofFront'] || formData.uploadedDocs['addressProof'],
+                      formData.uploadedDocs['addressProofBack']
+                    )}
+                    className="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-extrabold py-2 px-4 rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    View Combined A4 (Front + Back)
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Attachment Card 2: Identity Proof (Front & Back Side-by-Side) */}
@@ -734,6 +768,25 @@ export const OfficialIncomeForm = ({ onCancel }) => {
                   )}
                 </div>
               </div>
+
+              {/* View Combined A4 Button — Identity Proof */}
+              {(formData.uploadedDocs['identityProofFront'] || formData.uploadedDocs['identityProof']) &&
+               formData.uploadedDocs['identityProofBack'] && (
+                <div className="pt-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => openCombinedView(
+                      'Identity Proof (পৰিচয় পত্ৰ)',
+                      formData.uploadedDocs['identityProofFront'] || formData.uploadedDocs['identityProof'],
+                      formData.uploadedDocs['identityProofBack']
+                    )}
+                    className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-extrabold py-2 px-4 rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    View Combined A4 (Front + Back)
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Attachment Row 3: Applicant Signature */}
@@ -932,6 +985,18 @@ export const OfficialIncomeForm = ({ onCancel }) => {
           }}
         />
       )}
+
+      {/* Combined A4 View Modal — Front + Back on 1 page */}
+      <CombinedA4Modal
+        isOpen={combinedViewModal.isOpen}
+        onClose={closeCombinedView}
+        title={combinedViewModal.title}
+        applicantName={`${formData.applicantSalutation || ''} ${formData.applicantName || ''}`.trim() || 'Applicant'}
+        phone={formData.phone || ''}
+        refId={formData.applicationRefId || ''}
+        frontDoc={combinedViewModal.frontDoc}
+        backDoc={combinedViewModal.backDoc}
+      />
 
     </div>
   );
