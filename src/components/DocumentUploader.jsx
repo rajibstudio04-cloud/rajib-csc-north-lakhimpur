@@ -5,11 +5,11 @@ import {
   CheckCircle2, 
   X, 
   AlertCircle, 
-  Eye, 
-  Image as ImageIcon,
+  Eye,
   File
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { CombinedA4Modal } from './CombinedA4Modal';
 
 export const DocumentUploader = ({ 
   docRequirement, 
@@ -24,6 +24,7 @@ export const DocumentUploader = ({
   const { t } = useApp();
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState('');
+  const [showA4, setShowA4] = useState(false);
 
   // Resolve values flexibly regardless of caller syntax
   const effectiveId = docRequirement?.id || docId || 'doc';
@@ -165,15 +166,14 @@ export const DocumentUploader = ({
 
           <div className="flex items-center gap-1 shrink-0">
             {currentFile.url && (
-              <a
-                href={currentFile.url}
-                target="_blank"
-                rel="noreferrer"
-                className="p-1.5 text-slate-500 hover:text-csc-navy hover:bg-slate-100 rounded-md transition-colors"
-                title="Preview Document"
+              <button
+                type="button"
+                onClick={() => setShowA4(true)}
+                className="p-1.5 text-cyan-600 hover:text-cyan-800 hover:bg-cyan-50 rounded-md transition-colors"
+                title="View A4 Paper Preview"
               >
                 <Eye className="w-4 h-4" />
-              </a>
+              </button>
             )}
             <button
               type="button"
@@ -193,6 +193,15 @@ export const DocumentUploader = ({
           <span>{error}</span>
         </div>
       )}
+
+      {/* A4 Single Document Preview Modal */}
+      <CombinedA4Modal
+        isOpen={showA4}
+        onClose={() => setShowA4(false)}
+        title={effectiveName}
+        frontDoc={currentFile}
+        backDoc={null}
+      />
     </div>
   );
 };

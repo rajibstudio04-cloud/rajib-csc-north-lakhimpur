@@ -140,8 +140,13 @@ export const CombinedA4Modal = ({
   frontDoc = null,
   backDoc = null
 }) => {
-  const [tab, setTab] = useState('combined');
+  const [tab, setTab] = useState(backDoc ? 'combined' : 'front');
   const [previewVisible, setPreviewVisible] = useState(true);
+
+  // When backDoc changes (modal reused), reset tab
+  React.useEffect(() => {
+    setTab(backDoc ? 'combined' : 'front');
+  }, [backDoc, isOpen]);
 
   if (!isOpen) return null;
 
@@ -263,7 +268,7 @@ export const CombinedA4Modal = ({
               { id: 'combined', label: '📄 Combined A4',   active: 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30',   inactive: 'text-slate-400 hover:text-cyan-300 hover:bg-slate-800' },
               { id: 'front',    label: '🟣 Front Side',    active: 'bg-violet-500 text-white shadow-lg shadow-violet-500/30', inactive: 'text-slate-400 hover:text-violet-300 hover:bg-slate-800' },
               { id: 'back',     label: '🟠 Back Side',     active: 'bg-amber-500 text-white shadow-lg shadow-amber-500/30',   inactive: 'text-slate-400 hover:text-amber-300 hover:bg-slate-800' },
-            ].map(t => (
+            ].filter(t => backDoc ? true : (t.id === 'front')).map(t => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
@@ -347,18 +352,21 @@ export const CombinedA4Modal = ({
         {/* ── Bottom Controls Bar ── */}
         <div className="p-4 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 shrink-0">
           <div className="text-xs text-slate-400 font-medium text-center sm:text-left">
-            {tab === 'combined' && '📄 Combined Front & Back — A4 Sheet View'}
-            {tab === 'front'    && '🟣 Front Side Only — Single A4 Sheet'}
-            {tab === 'back'     && '🟠 Back Side Only — Single A4 Sheet'}
+            {!backDoc && '📄 Single Document — A4 Sheet View'}
+            {backDoc && tab === 'combined' && '📄 Combined Front & Back — A4 Sheet View'}
+            {backDoc && tab === 'front'    && '🟣 Front Side Only — Single A4 Sheet'}
+            {backDoc && tab === 'back'     && '🟠 Back Side Only — Single A4 Sheet'}
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap justify-center sm:justify-end">
-            <button
-              onClick={() => { downloadFront(); setTimeout(downloadBack, 400); setTimeout(downloadCombined, 800); }}
-              className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-600 transition-all cursor-pointer"
-            >
-              <ChevronRight className="w-3.5 h-3.5 text-cyan-300" />
-              Download All 3 PDFs
-            </button>
+            {backDoc && (
+              <button
+                onClick={() => { downloadFront(); setTimeout(downloadBack, 400); setTimeout(downloadCombined, 800); }}
+                className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl border border-slate-600 transition-all cursor-pointer"
+              >
+                <ChevronRight className="w-3.5 h-3.5 text-cyan-300" />
+                Download All 3 PDFs
+              </button>
+            )}
             <button
               onClick={tab === 'combined' ? downloadCombined : tab === 'front' ? downloadFront : downloadBack}
               className={`flex items-center gap-1.5 text-white text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-lg transition-all cursor-pointer
@@ -368,8 +376,8 @@ export const CombinedA4Modal = ({
             >
               <Download className="w-4 h-4" />
               {tab === 'combined' && 'Download Combined PDF'}
-              {tab === 'front'    && 'Download Front Side PDF'}
-              {tab === 'back'     && 'Download Back Side PDF'}
+              {(tab === 'front' || !backDoc) && 'Download A4 PDF'}
+              {tab === 'back' && backDoc && 'Download Back Side PDF'}
             </button>
           </div>
         </div>
