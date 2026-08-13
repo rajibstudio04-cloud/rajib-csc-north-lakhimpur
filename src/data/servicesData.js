@@ -35,8 +35,12 @@ export const SERVICES = [
       hi: 'छात्रवृत्ति और योजनाओं के लिए आय प्रमाण पत्र।'
     },
     requiredDocs: [
-      { id: 'addressProof', name: 'Address Proof (Electricity Bill / Voter ID)', required: true },
-      { id: 'landCert', name: 'Land Certificate / Jamabandi Receipt', required: true }
+      { id: 'addressProof', name: '1. Address Proof (ঠিকনাৰ প্ৰমান পত্ৰ)', required: true },
+      { id: 'identityProof', name: '2. Identity Proof (পৰিচয় পত্ৰ)', required: true },
+      { id: 'landReceipt', name: '3. Land Revenue Receipt (ৰাজহ মাচুল আদায়ৰ ৰছিদ)', required: true },
+      { id: 'salarySlip', name: '4. Salary Slip (দৰমহাৰ পত্ৰ)', required: false },
+      { id: 'otherDoc', name: '5. Any other document (অন্য নথি)', required: false },
+      { id: 'userForm', name: '6. Upload Scanned Copy of Application Form (ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)', required: true }
     ],
     fields: [
       { id: 'sourceOfIncome', label: 'Source of Income', type: 'select', options: ['Agriculture / Farming', 'Government Service', 'Private Employment', 'Business / Trade'] },

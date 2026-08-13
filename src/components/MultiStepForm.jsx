@@ -24,6 +24,8 @@ import {
   HeartHandshake
 } from 'lucide-react';
 
+import { OfficialIncomeForm } from './OfficialIncomeForm';
+
 export const MultiStepForm = () => {
   const { 
     lang, 
@@ -67,6 +69,11 @@ export const MultiStepForm = () => {
   // Safety check: Return null if no service is selected
   if (!selectedService) {
     return null;
+  }
+
+  // Render official Assam e-District Income Certificate form for income-cert
+  if (selectedService.id === 'income-cert') {
+    return <OfficialIncomeForm onCancel={() => setSelectedService(null)} />;
   }
 
   const serviceTitle = typeof selectedService.title === 'object'
