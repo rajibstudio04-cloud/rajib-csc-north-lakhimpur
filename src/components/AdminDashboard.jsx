@@ -29,7 +29,15 @@ import {
   AlertTriangle,
   Send,
   Zap,
-  Tag
+  Tag,
+  FileCheck,
+  Image as ImageIcon,
+  FolderOpen,
+  User,
+  MapPin,
+  Calendar,
+  CreditCard,
+  Building2
 } from 'lucide-react';
 
 export const AdminDashboard = ({ onLogout }) => {
@@ -43,9 +51,14 @@ export const AdminDashboard = ({ onLogout }) => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
-  // Selected Application drawer state
-  const [selectedApp, setSelectedApp] = useState(null);
+  // Modal States
+  const [viewFormApp, setViewFormApp] = useState(null); // Full Application Form Details Modal
+  const [viewDocsApp, setViewDocsApp] = useState(null); // Documents Viewer Gallery Modal
+  const [selectedApp, setSelectedApp] = useState(null); // Full Inspector / Edit Status Modal
   
+  // Active previewed document in document gallery
+  const [previewDoc, setPreviewDoc] = useState(null);
+
   // Bulk selection state
   const [selectedAppIds, setSelectedAppIds] = useState([]);
   
@@ -196,7 +209,7 @@ export const AdminDashboard = ({ onLogout }) => {
               </span>
             </div>
             <p className="text-xs text-slate-300 font-medium tracking-wide">
-              North Lakhimpur Common Service Centre • Live Application Manager
+              North Lakhimpur Common Service Centre • Live Application & Document Manager
             </p>
           </div>
         </div>
@@ -259,7 +272,7 @@ export const AdminDashboard = ({ onLogout }) => {
         <AdminWalletManager />
       ) : (
         <>
-      {/* PENDING WORK SLA ALERT GUARD BANNER (Shows whenever there are pending applications) */}
+      {/* PENDING WORK SLA ALERT GUARD BANNER */}
       {pendingCount > 0 && (
         <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 p-4 rounded-2xl shadow-md border border-amber-400 flex flex-col sm:flex-row justify-between items-center gap-3 animate-pulse">
           <div className="flex items-center gap-3">
@@ -271,7 +284,7 @@ export const AdminDashboard = ({ onLogout }) => {
                 ⚡ Pending Work Alert: {pendingCount} Customer Application(s) Awaiting Processing!
               </h3>
               <p className="text-xs font-semibold text-slate-900">
-                Ensure zero pending backlog — view and process citizen applications promptly to maintain fast SLA.
+                Inspect customer applied forms and uploaded documents to approve or complete applications.
               </p>
             </div>
           </div>
@@ -391,7 +404,7 @@ export const AdminDashboard = ({ onLogout }) => {
 
       </div>
 
-      {/* FLOATING BULK ACTIONS BAR (When items are selected) */}
+      {/* FLOATING BULK ACTIONS BAR */}
       {selectedAppIds.length > 0 && (
         <div className="bg-slate-900 text-white p-3 px-4 rounded-xl shadow-xl flex items-center justify-between gap-3 animate-in slide-in-from-top">
           <div className="flex items-center gap-2 text-xs font-bold text-cyan-300">
@@ -423,7 +436,7 @@ export const AdminDashboard = ({ onLogout }) => {
         </div>
       )}
 
-      {/* 5. Main Applications Data Table */}
+      {/* 5. Main Applications Data Table with explicit VIEW FORM & VIEW DOCUMENTS buttons */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -441,9 +454,10 @@ export const AdminDashboard = ({ onLogout }) => {
                 <th className="p-3">Applicant Name</th>
                 <th className="p-3">Service Title</th>
                 <th className="p-3">Submitted On</th>
-                <th className="p-3">Docs</th>
                 <th className="p-3">Fee</th>
                 <th className="p-3">Status</th>
+                <th className="p-3 text-center">Customer Form</th>
+                <th className="p-3 text-center">Uploaded Docs</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -451,6 +465,8 @@ export const AdminDashboard = ({ onLogout }) => {
               {filteredApps.length > 0 ? (
                 filteredApps.map((app) => {
                   const isPending = app.status === 'Pending' || app.status === 'Submitted' || app.status === 'Action Required';
+                  const docCount = app.documents ? app.documents.length : 0;
+
                   return (
                     <tr 
                       key={app.id} 
@@ -492,10 +508,6 @@ export const AdminDashboard = ({ onLogout }) => {
 
                       <td className="p-3 font-medium text-slate-700 max-w-xs truncate">{app.serviceTitle}</td>
                       <td className="p-3 text-slate-500 text-[11px] whitespace-nowrap">{app.submittedAt}</td>
-                      
-                      <td className="p-3 font-semibold text-blue-600">
-                        {app.documents ? app.documents.length : 0} Files
-                      </td>
 
                       <td className="p-3 font-extrabold text-slate-900 font-mono">₹{app.totalFee || 80}</td>
 
@@ -520,22 +532,54 @@ export const AdminDashboard = ({ onLogout }) => {
                         </select>
                       </td>
 
+                      {/* EXPLICIT VIEW FORM BUTTON */}
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => setViewFormApp(app)}
+                          className="bg-blue-50 hover:bg-blue-600 hover:text-white text-csc-navy border border-blue-200 font-extrabold px-3 py-1.5 rounded-xl text-[11px] inline-flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-csc-lightBlue" />
+                          <span>View Form</span>
+                        </button>
+                      </td>
+
+                      {/* EXPLICIT VIEW DOCUMENTS BUTTON */}
+                      <td className="p-3 text-center">
+                        <button
+                          onClick={() => {
+                            setViewDocsApp(app);
+                            if (app.documents && app.documents.length > 0) {
+                              setPreviewDoc(app.documents[0]);
+                            }
+                          }}
+                          className={`font-extrabold px-3 py-1.5 rounded-xl text-[11px] inline-flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer border ${
+                            docCount > 0 
+                              ? 'bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-900 border-purple-200' 
+                              : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                          }`}
+                        >
+                          <ImageIcon className="w-3.5 h-3.5 text-purple-600" />
+                          <span>View Docs ({docCount})</span>
+                        </button>
+                      </td>
+
                       <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => handleDownloadReceipt(app)}
                             className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer"
-                            title="Print PDF Acknowledgment Receipt"
+                            title="Print PDF Receipt"
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>
 
                           <button
                             onClick={() => openAppDrawer(app)}
-                            className="bg-csc-navy hover:bg-csc-lightBlue text-white font-extrabold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow-xs cursor-pointer"
+                            className="bg-csc-navy hover:bg-csc-lightBlue text-white font-extrabold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-xs cursor-pointer"
+                            title="Full Status & Update Drawer"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            <span>Inspect</span>
+                            <span>Update</span>
                           </button>
                         </div>
                       </td>
@@ -544,7 +588,7 @@ export const AdminDashboard = ({ onLogout }) => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="9" className="p-8 text-center text-slate-500">
+                  <td colSpan="10" className="p-8 text-center text-slate-500">
                     No applications matching current search & status filters.
                   </td>
                 </tr>
@@ -554,7 +598,373 @@ export const AdminDashboard = ({ onLogout }) => {
         </div>
       </div>
 
-      {/* Inspect & Document Viewer Modal Drawer */}
+      {/* ------------------------------------------------------------- */}
+      {/* 1. DEDICATED "VIEW CUSTOMER APPLIED FORM" MODAL DRAWER */}
+      {/* ------------------------------------------------------------- */}
+      {viewFormApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
+            
+            {/* Form Header */}
+            <div className="p-5 bg-gradient-to-r from-csc-navy via-slate-900 to-csc-lightBlue text-white flex justify-between items-center rounded-t-3xl border-b border-cyan-500/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                  <FileText className="w-5 h-5 text-cyan-300" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded">
+                    Official Customer Application Form
+                  </span>
+                  <h3 className="font-black text-lg text-white leading-tight">{viewFormApp.serviceTitle}</h3>
+                  <p className="text-xs text-slate-300 font-mono">Ref ID: {viewFormApp.id} • Submitted: {viewFormApp.submittedAt}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleDownloadReceipt(viewFormApp)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Receipt</span>
+                </button>
+
+                <button
+                  onClick={() => setViewFormApp(null)}
+                  className="text-slate-300 hover:text-white p-1 cursor-pointer rounded-lg bg-white/10 hover:bg-white/20"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Form Body - Structured Print-Style Layout */}
+            <div className="p-6 space-y-6 text-xs text-slate-800">
+              
+              {/* Reference Banner */}
+              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Service Category & Title</span>
+                  <strong className="text-sm text-csc-navy font-bold">{viewFormApp.serviceTitle}</strong>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-500 uppercase font-bold block">Current Processing Status</span>
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                    viewFormApp.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                    viewFormApp.status === 'Processing' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
+                    'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
+                    {viewFormApp.status || 'Submitted'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 1. Applicant Primary Personal Info */}
+              <div className="space-y-3">
+                <h4 className="font-extrabold text-sm text-csc-navy uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                  <User className="w-4 h-4 text-csc-lightBlue" />
+                  <span>1. Applicant Personal Details</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Full Applicant Name:</span>
+                    <strong className="text-slate-900 text-sm font-bold">{viewFormApp.applicantName}</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Father / Husband / Guardian Name:</span>
+                    <strong className="text-slate-900 text-sm">{viewFormApp.fatherName}</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Mobile Phone Number:</span>
+                    <strong className="text-slate-900 font-mono text-sm">+91 {viewFormApp.phone}</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Aadhaar Card Number:</span>
+                    <strong className="text-slate-900 font-mono text-sm">{viewFormApp.aadhaar}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Lakhimpur Residential Address */}
+              <div className="space-y-3">
+                <h4 className="font-extrabold text-sm text-csc-navy uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-red-500" />
+                  <span>2. Residential Address Details</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+                  <div className="sm:col-span-2">
+                    <span className="text-slate-500 block text-[11px]">Street / Village / Town Address:</span>
+                    <strong className="text-slate-900">{viewFormApp.address}</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">Panchayat / Circle:</span>
+                    <strong className="text-slate-900">{viewFormApp.panchayat}</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">District:</span>
+                    <strong className="text-slate-900">North Lakhimpur, Assam</strong>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-500 block text-[11px]">PIN Code:</span>
+                    <strong className="text-slate-900 font-mono">{viewFormApp.pinCode}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Service Specific Input Parameters (If any extra fields submitted) */}
+              {Object.keys(viewFormApp).filter(k => ![
+                'id', 'serviceId', 'serviceTitle', 'applicantName', 'fatherName', 
+                'phone', 'email', 'aadhaar', 'address', 'panchayat', 'district', 
+                'pinCode', 'govtFee', 'cscFee', 'totalFee', 'documents', 'paymentMethod', 
+                'status', 'submittedAt', 'updatedAt', 'remarks', 'issuedDocUrl'
+              ].includes(k)).length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-extrabold text-sm text-csc-navy uppercase tracking-wider border-b pb-2 flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-emerald-600" />
+                    <span>3. Additional Service Specific Parameters</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-blue-50/50 p-4 rounded-2xl border border-blue-200/80">
+                    {Object.keys(viewFormApp).filter(k => ![
+                      'id', 'serviceId', 'serviceTitle', 'applicantName', 'fatherName', 
+                      'phone', 'email', 'aadhaar', 'address', 'panchayat', 'district', 
+                      'pinCode', 'govtFee', 'cscFee', 'totalFee', 'documents', 'paymentMethod', 
+                      'status', 'submittedAt', 'updatedAt', 'remarks', 'issuedDocUrl'
+                    ].includes(k)).map(key => (
+                      <div key={key} className="bg-white p-3 rounded-xl border border-blue-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold block">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                        <strong className="text-slate-900 text-xs font-semibold">{String(viewFormApp[key])}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Financial Fee Summary */}
+              <div className="bg-gradient-to-r from-slate-900 to-csc-navy text-white p-4 rounded-2xl flex justify-between items-center">
+                <div>
+                  <span className="text-[10px] uppercase text-cyan-300 font-bold block">Application Fee Paid</span>
+                  <span className="text-xs text-slate-300">Govt Fee ₹{viewFormApp.govtFee || 30} + CSC Portal Fee ₹{viewFormApp.cscFee || 50}</span>
+                </div>
+
+                <div className="text-right">
+                  <span className="text-[10px] uppercase text-emerald-300 font-bold block">Total Cleared</span>
+                  <span className="text-xl font-black text-amber-400 font-mono">₹{viewFormApp.totalFee || 80}</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Modal Bottom Actions */}
+            <div className="p-4 bg-slate-100 rounded-b-3xl border-t border-slate-200 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  const app = viewFormApp;
+                  setViewFormApp(null);
+                  setViewDocsApp(app);
+                  if (app.documents && app.documents.length > 0) setPreviewDoc(app.documents[0]);
+                }}
+                className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow cursor-pointer"
+              >
+                <ImageIcon className="w-4 h-4" />
+                <span>Switch to View Documents ({viewFormApp.documents ? viewFormApp.documents.length : 0})</span>
+              </button>
+
+              <button
+                onClick={() => setViewFormApp(null)}
+                className="px-5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Close Form
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 2. DEDICATED "VIEW CUSTOMER DOCUMENTS GALLERY" MODAL */}
+      {/* ------------------------------------------------------------- */}
+      {viewDocsApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
+            
+            {/* Docs Header */}
+            <div className="p-5 bg-gradient-to-r from-purple-900 via-slate-900 to-csc-navy text-white flex justify-between items-center rounded-t-3xl border-b border-purple-500/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-400/30">
+                  <FolderOpen className="w-5 h-5 text-purple-300" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold text-purple-300 bg-purple-950/80 px-2 py-0.5 rounded">
+                    Customer Submitted Documents Gallery
+                  </span>
+                  <h3 className="font-black text-lg text-white leading-tight">
+                    {viewDocsApp.applicantName} — {viewDocsApp.serviceTitle}
+                  </h3>
+                  <p className="text-xs text-slate-300 font-mono">Total Uploaded Files: {viewDocsApp.documents ? viewDocsApp.documents.length : 0}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setViewDocsApp(null);
+                  setPreviewDoc(null);
+                }}
+                className="text-slate-300 hover:text-white p-1 cursor-pointer rounded-lg bg-white/10 hover:bg-white/20"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Docs Body - Preview Pane + Thumbnails */}
+            <div className="p-6 space-y-6">
+              
+              {viewDocsApp.documents && viewDocsApp.documents.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  
+                  {/* Left Column: Full Document Preview Display (7 cols) */}
+                  <div className="lg:col-span-7 bg-slate-900 rounded-2xl p-4 border border-slate-800 flex flex-col justify-between space-y-3 text-white min-h-[340px]">
+                    {previewDoc ? (
+                      <>
+                        <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                          <span className="text-xs font-extrabold text-cyan-300 truncate max-w-xs">{previewDoc.name}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">{previewDoc.size || 'Verified'}</span>
+                        </div>
+
+                        {/* Preview canvas */}
+                        <div className="flex-1 flex items-center justify-center p-2 overflow-hidden bg-slate-950 rounded-xl min-h-[250px]">
+                          {previewDoc.url && previewDoc.url.startsWith('data:image') ? (
+                            <img src={previewDoc.url} alt={previewDoc.name} className="max-h-[300px] w-auto object-contain rounded shadow" />
+                          ) : (
+                            <div className="text-center space-y-2 p-6">
+                              <FileText className="w-16 h-16 text-purple-400 mx-auto" />
+                              <p className="text-xs font-bold text-slate-300">{previewDoc.name}</p>
+                              <p className="text-[10px] text-slate-500">PDF Document File</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 pt-1">
+                          {previewDoc.url && (
+                            <>
+                              <a
+                                href={previewDoc.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex-1 bg-csc-navy hover:bg-csc-lightBlue text-white text-xs font-bold py-2 rounded-xl text-center flex items-center justify-center gap-1 cursor-pointer transition-all"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>Open Full Screen</span>
+                              </a>
+
+                              <a
+                                href={previewDoc.url}
+                                download={previewDoc.name || 'document'}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl text-center flex items-center justify-center gap-1 cursor-pointer transition-all"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Download File</span>
+                              </a>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-slate-500 text-xs">
+                        Select a document from the list to preview.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: List of All Uploaded Files (5 cols) */}
+                  <div className="lg:col-span-5 space-y-3">
+                    <h4 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">
+                      Attached Document Files List ({viewDocsApp.documents.length})
+                    </h4>
+
+                    <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+                      {viewDocsApp.documents.map((doc, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => setPreviewDoc(doc)}
+                          className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            previewDoc === doc 
+                              ? 'bg-purple-50 border-purple-500 shadow-md ring-2 ring-purple-400/30' 
+                              : 'bg-white border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 overflow-hidden">
+                            {doc.url && doc.url.startsWith('data:image') ? (
+                              <img src={doc.url} alt="thumb" className="w-10 h-10 object-cover rounded-lg border shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-800 font-black text-xs flex items-center justify-center shrink-0">
+                                PDF
+                              </div>
+                            )}
+                            <div className="truncate">
+                              <p className="font-extrabold text-slate-800 text-xs truncate">{doc.name}</p>
+                              <p className="text-[10px] text-slate-400">{doc.size || 'Verified Document'}</p>
+                            </div>
+                          </div>
+
+                          <Eye className={`w-4 h-4 shrink-0 ${previewDoc === doc ? 'text-purple-600' : 'text-slate-400'}`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              ) : (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center space-y-2">
+                  <FolderOpen className="w-10 h-10 text-slate-400 mx-auto" />
+                  <p className="text-xs font-bold text-slate-700">No documents attached for this application.</p>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Bottom Actions */}
+            <div className="p-4 bg-slate-100 rounded-b-3xl border-t border-slate-200 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  const app = viewDocsApp;
+                  setViewDocsApp(null);
+                  setViewFormApp(app);
+                }}
+                className="bg-csc-navy hover:bg-csc-lightBlue text-white font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow cursor-pointer"
+              >
+                <FileText className="w-4 h-4 text-cyan-300" />
+                <span>Switch to View Applied Form</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setViewDocsApp(null);
+                  setPreviewDoc(null);
+                }}
+                className="px-5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Close Gallery
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 3. FULL APPLICATION INSPECTOR & STATUS UPDATE DRAWER */}
+      {/* ------------------------------------------------------------- */}
       {selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 flex flex-col">
@@ -562,7 +972,7 @@ export const AdminDashboard = ({ onLogout }) => {
             {/* Modal Top Bar */}
             <div className="p-4 bg-csc-navy text-white flex justify-between items-center rounded-t-2xl">
               <div>
-                <h3 className="font-bold text-base">Application Inspector & Document Manager</h3>
+                <h3 className="font-bold text-base">Application Status Manager</h3>
                 <p className="text-xs text-cyan-200 font-mono">Ref ID: {selectedApp.id}</p>
               </div>
 
@@ -608,89 +1018,6 @@ export const AdminDashboard = ({ onLogout }) => {
                 <div className="sm:col-span-2">
                   <span className="text-slate-500 block">Address:</span>
                   <strong className="text-slate-900">{selectedApp.address}, {selectedApp.panchayat}, Lakhimpur - {selectedApp.pinCode}</strong>
-                </div>
-
-                {/* Render Dynamic Service-Specific Fields */}
-                {Object.keys(selectedApp).filter(k => ![
-                  'id', 'serviceId', 'serviceTitle', 'applicantName', 'fatherName', 
-                  'phone', 'email', 'aadhaar', 'address', 'panchayat', 'district', 
-                  'pinCode', 'govtFee', 'cscFee', 'totalFee', 'documents', 'paymentMethod', 
-                  'status', 'submittedAt', 'updatedAt', 'remarks', 'issuedDocUrl'
-                ].includes(k)).length > 0 && (
-                  <div className="sm:col-span-2 pt-2 border-t border-slate-200">
-                    <span className="text-[10px] font-bold text-csc-navy uppercase tracking-wider block mb-1">
-                      Service Specific Form Parameters
-                    </span>
-                    <div className="grid grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-200">
-                      {Object.keys(selectedApp).filter(k => ![
-                        'id', 'serviceId', 'serviceTitle', 'applicantName', 'fatherName', 
-                        'phone', 'email', 'aadhaar', 'address', 'panchayat', 'district', 
-                        'pinCode', 'govtFee', 'cscFee', 'totalFee', 'documents', 'paymentMethod', 
-                        'status', 'submittedAt', 'updatedAt', 'remarks', 'issuedDocUrl'
-                      ].includes(k)).map(key => (
-                        <div key={key}>
-                          <span className="text-[11px] text-slate-400 capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span>
-                          <p className="font-semibold text-slate-800">{String(selectedApp[key])}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Uploaded Documents Viewer Box */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-csc-navy" />
-                  <span>Submitted Customer Documents ({selectedApp.documents ? selectedApp.documents.length : 0})</span>
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {selectedApp.documents && selectedApp.documents.length > 0 ? (
-                    selectedApp.documents.map((doc, idx) => (
-                      <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          {doc.url && doc.url.startsWith('data:image') ? (
-                            <img src={doc.url} alt="doc thumbnail" className="w-10 h-10 object-cover rounded border" />
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs">
-                              PDF
-                            </div>
-                          )}
-                          <div className="truncate text-xs">
-                            <p className="font-semibold text-slate-800 truncate">{doc.name}</p>
-                            <p className="text-[10px] text-slate-400">{doc.size || 'Verified'}</p>
-                          </div>
-                        </div>
-
-                        {doc.url && (
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="bg-slate-100 hover:bg-csc-lightBlue hover:text-white p-2 rounded-lg text-slate-700 text-xs font-bold transition-all flex items-center gap-1"
-                              title="View Document"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>View</span>
-                            </a>
-                            <a
-                              href={doc.url}
-                              download={doc.name || `document_${idx + 1}`}
-                              className="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 p-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1 border border-emerald-200"
-                              title="Download Document"
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                              <span>Save</span>
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-400 italic col-span-2">No uploaded document files attached.</p>
-                  )}
                 </div>
               </div>
 
@@ -768,7 +1095,7 @@ export const AdminDashboard = ({ onLogout }) => {
                 onClick={() => setSelectedApp(null)}
                 className="px-4 py-2 bg-slate-800 text-white font-semibold text-xs rounded-xl cursor-pointer"
               >
-                Close Inspector
+                Close Manager
               </button>
             </div>
 
@@ -781,4 +1108,5 @@ export const AdminDashboard = ({ onLogout }) => {
     </div>
   );
 };
+
 
