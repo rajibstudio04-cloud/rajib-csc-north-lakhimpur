@@ -35,12 +35,16 @@ export const SERVICES = [
       hi: 'छात्रवृत्ति और योजनाओं के लिए आय प्रमाण पत्र।'
     },
     requiredDocs: [
-      { id: 'addressProof', name: '1. Address Proof (ঠিকনাৰ প্ৰমান পত্ৰ)', required: true },
-      { id: 'identityProof', name: '2. Identity Proof (পৰিচয় পত্ৰ)', required: true },
-      { id: 'landReceipt', name: '3. Land Revenue Receipt (ৰাজহ মাচুল আদায়ৰ ৰছিদ)', required: true },
-      { id: 'salarySlip', name: '4. Salary Slip (দৰমহাৰ পত্ৰ)', required: false },
-      { id: 'otherDoc', name: '5. Any other document (অন্য নথি)', required: false },
-      { id: 'userForm', name: '6. Upload Scanned Copy of Application Form (ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)', required: true }
+      { id: 'addressProofFront', name: '1. Address Proof - Front Side (ঠিকনাৰ প্ৰমান পত্ৰ - সন্মুখৰ ভাগ)', required: true },
+      { id: 'addressProofBack', name: '2. Address Proof - Back Side (ঠিকনাৰ প্ৰমান পত্ৰ - পিছফালৰ ভাগ)', required: true },
+      { id: 'identityProofFront', name: '3. Identity Proof - Front Side (পৰিচয় পত্ৰ - সন্মুখৰ ভাগ)', required: true },
+      { id: 'identityProofBack', name: '4. Identity Proof - Back Side (পৰিচয় পত্ৰ - পিছফালৰ ভাগ)', required: true },
+      { id: 'applicantSignature', name: '5. Applicant Signature / Specimen (আবেদনকাৰীৰ স্বাক্ষৰ / টিপ ছাব)', required: true },
+      { id: 'gaonPradhanCert', name: '6. Gaon Pradhan / Gaonburah Certificate (গাঁও প্ৰধান / গাওঁবুঢ়াৰ প্ৰমাণ পত্ৰ)', required: true },
+      { id: 'landReceipt', name: '7. Land Revenue Receipt (ৰাজহ মাচুল আদায়ৰ ৰছিদ)', required: true },
+      { id: 'salarySlip', name: '8. Salary Slip (দৰমহাৰ পত্ৰ)', required: false },
+      { id: 'otherDoc', name: '9. Any other document (অন্য নথি)', required: false },
+      { id: 'userForm', name: '10. Upload Scanned Copy of Application Form (ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)', required: true }
     ],
     fields: [
       { id: 'sourceOfIncome', label: 'Source of Income', type: 'select', options: ['Agriculture / Farming', 'Government Service', 'Private Employment', 'Business / Trade'] },

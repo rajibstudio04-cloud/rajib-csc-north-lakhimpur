@@ -88,10 +88,20 @@ export const OfficialIncomeForm = ({ onCancel }) => {
     if (!formData.addressLine1.trim()) errors.addressLine1 = 'Address Line 1 is required (ঠিকনাৰ প্ৰথম শাৰী ধাৰ্য কৰক)';
     if (!formData.pinCode || formData.pinCode.length < 6) errors.pinCode = 'Valid 6-digit PIN code required (পিন নম্বৰ ধাৰ্য কৰক)';
 
-    // Mandatory Document Validations (Address Proof, Identity Proof, Land Receipt, User Form)
-    const requiredDocs = ['addressProof', 'identityProof', 'landReceipt', 'userForm'];
+    // Mandatory Document Validations
+    const requiredDocs = [
+      'addressProofFront',
+      'addressProofBack',
+      'identityProofFront',
+      'identityProofBack',
+      'applicantSignature',
+      'gaonPradhanCert',
+      'landReceipt',
+      'userForm'
+    ];
     requiredDocs.forEach((docId) => {
-      if (!formData.uploadedDocs?.[docId]) {
+      const legacyId = docId.replace('Front', '').replace('Back', '');
+      if (!formData.uploadedDocs?.[docId] && !formData.uploadedDocs?.[legacyId]) {
         errors[docId] = 'Mandatory document upload required (নথি জমা দিয়া বাধ্যতামূলক)';
       }
     });
@@ -673,72 +683,184 @@ export const OfficialIncomeForm = ({ onCancel }) => {
 
           <div className="space-y-4">
             
-            {/* Attachment Row 1: Address Proof */}
+            {/* Attachment Row 1: Address Proof Front */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    1. Address Proof <span className="text-red-600">*</span>
+                    1. Address Proof - Front Side <span className="text-red-600">*</span>
                   </h4>
-                  <span className="font-bold text-slate-800 text-xs">(ঠিকনাৰ প্ৰমান পত্ৰ)</span>
+                  <span className="font-bold text-slate-800 text-xs">(ঠিকনাৰ প্ৰমান পত্ৰ - সন্মুখৰ ভাগ)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
                 <div className="shrink-0 w-full sm:w-72">
                   <DocumentUploader
-                    docId="addressProof"
-                    label="Address Proof (ঠিকনাৰ প্ৰমান পত্ৰ)"
+                    docId="addressProofFront"
+                    label="Address Proof Front (ঠিকনাৰ প্ৰমান পত্ৰ সন্মুখ)"
                     required={true}
                     onUploaded={handleDocumentUploaded}
-                    existingDoc={formData.uploadedDocs['addressProof']}
+                    existingDoc={formData.uploadedDocs['addressProofFront'] || formData.uploadedDocs['addressProof']}
                   />
                 </div>
               </div>
-              {validationErrors.addressProof && (
-                <p className="text-red-600 font-bold text-[11px]">{validationErrors.addressProof}</p>
+              {validationErrors.addressProofFront && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.addressProofFront}</p>
               )}
             </div>
 
-            {/* Attachment Row 2: Identity Proof */}
+            {/* Attachment Row 2: Address Proof Back */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    2. Identity Proof <span className="text-red-600">*</span>
+                    2. Address Proof - Back Side <span className="text-red-600">*</span>
                   </h4>
-                  <span className="font-bold text-slate-800 text-xs">(পৰিচয় পত্ৰ)</span>
+                  <span className="font-bold text-slate-800 text-xs">(ঠিকনাৰ প্ৰমান পত্ৰ - পিছফালৰ ভাগ)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
                 <div className="shrink-0 w-full sm:w-72">
                   <DocumentUploader
-                    docId="identityProof"
-                    label="Identity Proof (পৰিচয় পত্ৰ)"
+                    docId="addressProofBack"
+                    label="Address Proof Back (ঠিকনাৰ প্ৰমান পত্ৰ পিছফাল)"
                     required={true}
                     onUploaded={handleDocumentUploaded}
-                    existingDoc={formData.uploadedDocs['identityProof']}
+                    existingDoc={formData.uploadedDocs['addressProofBack']}
                   />
                 </div>
               </div>
-              {validationErrors.identityProof && (
-                <p className="text-red-600 font-bold text-[11px]">{validationErrors.identityProof}</p>
+              {validationErrors.addressProofBack && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.addressProofBack}</p>
               )}
             </div>
 
-            {/* Attachment Row 3: Land Revenue Receipt */}
+            {/* Attachment Row 3: Identity Proof Front */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    3. Land Revenue Receipt <span className="text-red-600">*</span>
+                    3. Identity Proof - Front Side <span className="text-red-600">*</span>
+                  </h4>
+                  <span className="font-bold text-slate-800 text-xs">(পৰিচয় পত্ৰ - সন্মুখৰ ভাগ)</span>
+                  <p className="text-[11px] text-teal-800 font-medium">
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
+                  </p>
+                </div>
+
+                <div className="shrink-0 w-full sm:w-72">
+                  <DocumentUploader
+                    docId="identityProofFront"
+                    label="Identity Proof Front (পৰিচয় পত্ৰ সন্মুখ)"
+                    required={true}
+                    onUploaded={handleDocumentUploaded}
+                    existingDoc={formData.uploadedDocs['identityProofFront'] || formData.uploadedDocs['identityProof']}
+                  />
+                </div>
+              </div>
+              {validationErrors.identityProofFront && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.identityProofFront}</p>
+              )}
+            </div>
+
+            {/* Attachment Row 4: Identity Proof Back */}
+            <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm">
+                    4. Identity Proof - Back Side <span className="text-red-600">*</span>
+                  </h4>
+                  <span className="font-bold text-slate-800 text-xs">(পৰিচয় পত্ৰ - পিছফালৰ ভাগ)</span>
+                  <p className="text-[11px] text-teal-800 font-medium">
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
+                  </p>
+                </div>
+
+                <div className="shrink-0 w-full sm:w-72">
+                  <DocumentUploader
+                    docId="identityProofBack"
+                    label="Identity Proof Back (পৰিচয় পত্ৰ পিছফাল)"
+                    required={true}
+                    onUploaded={handleDocumentUploaded}
+                    existingDoc={formData.uploadedDocs['identityProofBack']}
+                  />
+                </div>
+              </div>
+              {validationErrors.identityProofBack && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.identityProofBack}</p>
+              )}
+            </div>
+
+            {/* Attachment Row 5: Applicant Signature */}
+            <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm">
+                    5. Applicant Signature / Specimen <span className="text-red-600">*</span>
+                  </h4>
+                  <span className="font-bold text-slate-800 text-xs">(আবেদনকাৰীৰ স্বাক্ষৰ / টিপ ছাব)</span>
+                  <p className="text-[11px] text-teal-800 font-medium">
+                    ( Only .jpg, .jpeg, .png files are allowed with max size of 2MB )
+                  </p>
+                </div>
+
+                <div className="shrink-0 w-full sm:w-72">
+                  <DocumentUploader
+                    docId="applicantSignature"
+                    label="Applicant Signature (স্বাক্ষৰ / টিপ ছাব)"
+                    required={true}
+                    onUploaded={handleDocumentUploaded}
+                    existingDoc={formData.uploadedDocs['applicantSignature']}
+                  />
+                </div>
+              </div>
+              {validationErrors.applicantSignature && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.applicantSignature}</p>
+              )}
+            </div>
+
+            {/* Attachment Row 6: Gaon Pradhan Certificate */}
+            <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm">
+                    6. Gaon Pradhan / Gaonburah Certificate <span className="text-red-600">*</span>
+                  </h4>
+                  <span className="font-bold text-slate-800 text-xs">(গাঁও প্ৰধান / গাওঁবুঢ়াৰ প্ৰমাণ পত্ৰ)</span>
+                  <p className="text-[11px] text-teal-800 font-medium">
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
+                  </p>
+                </div>
+
+                <div className="shrink-0 w-full sm:w-72">
+                  <DocumentUploader
+                    docId="gaonPradhanCert"
+                    label="Gaon Pradhan Cert (গাঁও প্ৰধানৰ প্ৰমাণ পত্ৰ)"
+                    required={true}
+                    onUploaded={handleDocumentUploaded}
+                    existingDoc={formData.uploadedDocs['gaonPradhanCert']}
+                  />
+                </div>
+              </div>
+              {validationErrors.gaonPradhanCert && (
+                <p className="text-red-600 font-bold text-[11px]">{validationErrors.gaonPradhanCert}</p>
+              )}
+            </div>
+
+            {/* Attachment Row 7: Land Revenue Receipt */}
+            <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-sm">
+                    7. Land Revenue Receipt <span className="text-red-600">*</span>
                   </h4>
                   <span className="font-bold text-slate-800 text-xs">(ৰাজহ মাচুল আদায়ৰ ৰছিদ)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
@@ -757,16 +879,16 @@ export const OfficialIncomeForm = ({ onCancel }) => {
               )}
             </div>
 
-            {/* Attachment Row 4: Salary Slip */}
+            {/* Attachment Row 8: Salary Slip */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    4. Salary Slip
+                    8. Salary Slip
                   </h4>
                   <span className="font-bold text-slate-800 text-xs">(দৰমহাৰ পত্ৰ)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
@@ -782,16 +904,16 @@ export const OfficialIncomeForm = ({ onCancel }) => {
               </div>
             </div>
 
-            {/* Attachment Row 5: Any other document */}
+            {/* Attachment Row 9: Any other document */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    5. Any other document
+                    9. Any other document
                   </h4>
                   <span className="font-bold text-slate-800 text-xs">(অন্য নথি)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
@@ -807,16 +929,16 @@ export const OfficialIncomeForm = ({ onCancel }) => {
               </div>
             </div>
 
-            {/* Attachment Row 6: Upload Scanned Copy of Application Form */}
+            {/* Attachment Row 10: Upload Scanned Copy of Application Form */}
             <div className="bg-white p-4 rounded-xl border border-slate-300 space-y-2">
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <div>
                   <h4 className="font-extrabold text-slate-900 text-sm">
-                    6. Upload Scanned Copy of the Application Form. <span className="text-red-600">*</span>
+                    10. Upload Scanned Copy of the Application Form. <span className="text-red-600">*</span>
                   </h4>
                   <span className="font-bold text-slate-800 text-xs">(ইউজাৰ ফৰ্মখন সংলগ্ন কৰা)</span>
                   <p className="text-[11px] text-teal-800 font-medium">
-                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 500Kb )
+                    ( Only .jpg, .jpeg, .png, pdf files are allowed with max size of 2MB )
                   </p>
                 </div>
 
